@@ -2,7 +2,8 @@
 # frozen_string_literal: true
 
 module Warden
-  class UserNotSet < RuntimeError; end
+  class UserNotSet < RuntimeError;
+  end
 
   class Proxy
     # An accessor to the winning strategy
@@ -28,7 +29,7 @@ module Warden
     def initialize(env, manager) #:nodoc:
       @env, @users, @winning_strategies, @locked = env, {}, {}, false
       @manager, @config = manager, manager.config.dup
-      @strategies = Hash.new { |h,k| h[k] = {} }
+      @strategies = Hash.new { |h, k| h[k] = {} }
     end
 
     # Run the on_request callbacks
@@ -215,7 +216,7 @@ module Warden
     #
     # :api: public
     def user(argument = {})
-      opts  = argument.is_a?(Hash) ? argument : { :scope => argument }
+      opts = argument.is_a?(Hash) ? argument : { :scope => argument }
       scope = (opts[:scope] ||= @config.default_scope)
 
       if @users.has_key?(scope)
@@ -289,8 +290,10 @@ module Warden
     # Proxy through to the authentication strategy to find out the message that was generated.
     # :api: public
     def message
-      Rails.logger.info("winning_strategy: #{winning_strategy}")
-      Rails.logger.info("winning_strategy.message: #{winning_strategy.message}")
+      if winning_strategy
+        Rails.logger.info("winning_strategy: #{winning_strategy}")
+        Rails.logger.info("winning_strategy.message: #{winning_strategy.message}")
+      end
       winning_strategy && winning_strategy.message
     end
 
@@ -345,15 +348,15 @@ module Warden
     end
 
     def _retrieve_scope_and_opts(args) #:nodoc:
-      opts  = args.last.is_a?(Hash) ? args.pop : {}
+      opts = args.last.is_a?(Hash) ? args.pop : {}
       scope = opts[:scope] || @config.default_scope
-      opts  = (@config[:scope_defaults][scope] || {}).merge(opts)
+      opts = (@config[:scope_defaults][scope] || {}).merge(opts)
       [scope, opts]
     end
 
     # Run the strategies for a given scope
     def _run_strategies_for(scope, args) #:nodoc:
-      Rails.logger.info("@winning_strategies: #{@winning_strategies}")
+      # Rails.logger.info("@winning_strategies: #{@winning_strategies}")
       Rails.logger.info("scope: #{scope}")
       Rails.logger.info("args: #{args}")
       self.winning_strategy = @winning_strategies[scope]
@@ -368,7 +371,7 @@ module Warden
       return if @locked
 
       if args.empty?
-        defaults   = @config[:default_strategies]
+        defaults = @config[:default_strategies]
         strategies = defaults[scope] || defaults[:_all]
       end
 
@@ -380,6 +383,7 @@ module Warden
         Rails.logger.info("performed #{strategy.performed?}")
         Rails.logger.info("valid #{strategy.valid?}")
         next unless strategy && !strategy.performed? && strategy.valid?
+        Rails.logger.info("kaihi next")
 
         strategy._run!
         self.winning_strategy = @winning_strategies[scope] = strategy
