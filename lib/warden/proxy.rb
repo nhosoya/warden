@@ -332,6 +332,9 @@ module Warden
 
     def _perform_authentication(*args)
       scope, opts = _retrieve_scope_and_opts(args)
+      Rails.logger.info("_perform_authentication #{args}")
+      Rails.logger.info("_perform_authentication #{scope}")
+      Rails.logger.info("_perform_authentication #{opts}")
       user = nil
 
       # Look for an existing user in the session for this scope.
