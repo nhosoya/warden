@@ -289,6 +289,8 @@ module Warden
     # Proxy through to the authentication strategy to find out the message that was generated.
     # :api: public
     def message
+      Rails.logger.info("winning_strategy: #{winning_strategy}")
+      Rails.logger.info("winning_strategy.message: #{winning_strategy.message}")
       winning_strategy && winning_strategy.message
     end
 
@@ -351,9 +353,17 @@ module Warden
 
     # Run the strategies for a given scope
     def _run_strategies_for(scope, args) #:nodoc:
+      Rails.logger.info("@winning_strategies: #{@winning_strategies}")
+      Rails.logger.info("scope: #{scope}")
+      Rails.logger.info("args: #{args}")
       self.winning_strategy = @winning_strategies[scope]
+
+      if winning_strategy
+        Rails.logger.info("halted?: #{winning_strategy.halted?}")
+      end
       return if winning_strategy && winning_strategy.halted?
 
+      Rails.logger.info("@locked: #{@locked}")
       # Do not run any strategy if locked
       return if @locked
 
@@ -362,8 +372,13 @@ module Warden
         strategies = defaults[scope] || defaults[:_all]
       end
 
+      Rails.logger.info("strategies #{strategies}")
       (strategies || args).each do |name|
         strategy = _fetch_strategy(name, scope)
+        Rails.logger.info("name #{name}")
+        Rails.logger.info("strategy #{strategy}")
+        Rails.logger.info("performed #{strategy.performed?}")
+        Rails.logger.info("valid #{strategy.valid?}")
         next unless strategy && !strategy.performed? && strategy.valid?
 
         strategy._run!

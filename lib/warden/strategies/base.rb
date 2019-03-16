@@ -134,6 +134,7 @@ module Warden
       # Halts the strategies so that this is the last strategy checked
       # :api: public
       def fail!(message = "Failed to Login")
+        Rails.logger.info("message #{message}")
         halt!
         @message = message
         @result = :failure
