@@ -108,6 +108,7 @@ module Warden
     #
     # :api: public
     def authenticate(*args)
+      Rails.logger.info("authenticate #{args}")
       user, _opts = _perform_authentication(*args)
       user
     end
